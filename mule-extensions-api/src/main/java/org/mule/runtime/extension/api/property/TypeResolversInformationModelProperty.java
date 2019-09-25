@@ -133,6 +133,9 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
   }
 
   private ResolverInformation getResolverInformation(String resolverName) {
+
+    Optional<ResolverInformation> optional = getKeysResolver();
+
     ResolverInformation resolverInformation = null;
     String sanatizedName = sanitizeResolverName(resolverName);
     if (sanatizedName != null) {

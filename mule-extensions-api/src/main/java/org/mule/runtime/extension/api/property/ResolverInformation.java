@@ -20,11 +20,18 @@ public class ResolverInformation {
   private String resolverName;
   private boolean requiresConnection;
   private boolean requiresConfiguration;
+  private boolean isPartialFetch;
 
   ResolverInformation(String resolverName, boolean requiresConnection, boolean requiresConfiguration) {
     this.resolverName = resolverName;
     this.requiresConnection = requiresConnection;
     this.requiresConfiguration = requiresConfiguration;
+    this.isPartialFetch = false;
+  }
+
+  ResolverInformation(String resolverName, boolean requiresConnection, boolean requiresConfiguration, boolean isPartialFetch) {
+    this(resolverName, requiresConnection, requiresConfiguration);
+    this.isPartialFetch = isPartialFetch;
   }
 
   /**
@@ -48,6 +55,13 @@ public class ResolverInformation {
     return requiresConfiguration;
   }
 
+  /**
+   * @return a boolean indicating if the resolver fetch metadata partially
+   */
+  public boolean isPartialFetch() {
+    return isPartialFetch;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -57,11 +71,12 @@ public class ResolverInformation {
     ResolverInformation that = (ResolverInformation) o;
     return requiresConnection == that.requiresConnection &&
         requiresConfiguration == that.requiresConfiguration &&
+           isPartialFetch == that.isPartialFetch &&
         Objects.equals(resolverName, that.resolverName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(resolverName, requiresConnection, requiresConfiguration);
+    return Objects.hash(resolverName, requiresConnection, requiresConfiguration, isPartialFetch);
   }
 }
