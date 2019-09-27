@@ -35,7 +35,7 @@ public class ResolverInformation {
   }
 
   /**
-   * @return The name of the resolver
+   * @return The name of the resolv
    */
   public String getResolverName() {
     return resolverName;
@@ -56,7 +56,9 @@ public class ResolverInformation {
   }
 
   /**
-   * @return a boolean indicating if the resolver fetch metadata partially
+   * @return a boolean indicating if the resolver fetches metadata partially
+   *
+   * @since 1.2.2, 1.3.0
    */
   public boolean isPartialFetch() {
     return isPartialFetch;
@@ -71,7 +73,7 @@ public class ResolverInformation {
     ResolverInformation that = (ResolverInformation) o;
     return requiresConnection == that.requiresConnection &&
         requiresConfiguration == that.requiresConfiguration &&
-           isPartialFetch == that.isPartialFetch &&
+        isPartialFetch == that.isPartialFetch &&
         Objects.equals(resolverName, that.resolverName);
   }
 

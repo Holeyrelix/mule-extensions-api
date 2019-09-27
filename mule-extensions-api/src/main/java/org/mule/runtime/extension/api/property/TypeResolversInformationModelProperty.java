@@ -39,6 +39,7 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
   private final Map<String, ResolverInformation> inputResolvers;
   private final transient boolean requiresConnection;
   private final transient boolean requiresConfiguration;
+  private final transient boolean isPartialFetch;
 
   public TypeResolversInformationModelProperty(String category,
                                                Map<String, String> parameters,
@@ -46,9 +47,11 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
                                                String attributesResolver,
                                                String keysResolver,
                                                boolean requiresConnection,
-                                               boolean requiresConfiguration) {
+                                               boolean requiresConfiguration,
+                                               boolean isPartialFetch) {
     this.requiresConnection = requiresConnection;
     this.requiresConfiguration = requiresConfiguration;
+    this.isPartialFetch = isPartialFetch;
     checkArgument(isNotBlank(category), "A Category name is required for a group of resolvers");
     this.category = category;
     Map<String, String> paramResolvers = parameters != null && parameters.isEmpty() ? null : parameters;
@@ -64,6 +67,17 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
     } else {
       this.inputResolvers = null;
     }
+  }
+
+  public TypeResolversInformationModelProperty(String category,
+                                               Map<String, String> parameters,
+                                               String outputResolver,
+                                               String attributesResolver,
+                                               String keysResolver,
+                                               boolean requiresConnection,
+                                               boolean requiresConfiguration) {
+    this(category, parameters, outputResolver, attributesResolver, keysResolver, requiresConnection, requiresConfiguration,
+         false);
   }
 
   /**
@@ -133,9 +147,6 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
   }
 
   private ResolverInformation getResolverInformation(String resolverName) {
-
-    Optional<ResolverInformation> optional = getKeysResolver();
-
     ResolverInformation resolverInformation = null;
     String sanatizedName = sanitizeResolverName(resolverName);
     if (sanatizedName != null) {
