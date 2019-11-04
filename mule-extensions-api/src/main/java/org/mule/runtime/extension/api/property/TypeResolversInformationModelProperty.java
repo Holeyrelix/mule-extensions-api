@@ -39,7 +39,7 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
   private final Map<String, ResolverInformation> inputResolvers;
   private final transient boolean requiresConnection;
   private final transient boolean requiresConfiguration;
-  private final transient boolean isPartialFetch;
+  private final transient boolean isKeyResolverPartialFetch;
 
   public TypeResolversInformationModelProperty(String category,
                                                Map<String, String> parameters,
@@ -48,22 +48,22 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
                                                String keysResolver,
                                                boolean requiresConnection,
                                                boolean requiresConfiguration,
-                                               boolean isPartialFetch) {
+                                               boolean isKeyResolverPartialFetch) {
     this.requiresConnection = requiresConnection;
     this.requiresConfiguration = requiresConfiguration;
-    this.isPartialFetch = isPartialFetch;
+    this.isKeyResolverPartialFetch = isKeyResolverPartialFetch;
     checkArgument(isNotBlank(category), "A Category name is required for a group of resolvers");
     this.category = category;
     Map<String, String> paramResolvers = parameters != null && parameters.isEmpty() ? null : parameters;
 
-    this.outputResolver = getResolverInformation(outputResolver);
-    this.attributesResolver = getResolverInformation(attributesResolver);
-    this.keysResolver = getResolverInformation(keysResolver);
+    this.outputResolver = getResolverInformation(outputResolver, false);
+    this.attributesResolver = getResolverInformation(attributesResolver, false);
+    this.keysResolver = getResolverInformation(keysResolver, isKeyResolverPartialFetch);
 
     if (paramResolvers != null) {
       this.inputResolvers = new HashMap<>();
       paramResolvers
-          .forEach((paramName, resolverName) -> this.inputResolvers.put(paramName, getResolverInformation(resolverName)));
+          .forEach((paramName, resolverName) -> this.inputResolvers.put(paramName, getResolverInformation(resolverName, false)));
     } else {
       this.inputResolvers = null;
     }
@@ -146,11 +146,11 @@ public class TypeResolversInformationModelProperty implements ModelProperty {
     return isAllBlank(resolverName) || NULL_RESOLVER_NAME.equals(resolverName) ? null : resolverName;
   }
 
-  private ResolverInformation getResolverInformation(String resolverName) {
+  private ResolverInformation getResolverInformation(String resolverName, boolean isPartialFetch) {
     ResolverInformation resolverInformation = null;
     String sanatizedName = sanitizeResolverName(resolverName);
     if (sanatizedName != null) {
-      resolverInformation = new ResolverInformation(sanatizedName, requiresConnection, requiresConfiguration);
+      resolverInformation = new ResolverInformation(sanatizedName, requiresConnection, requiresConfiguration, isPartialFetch);
     }
     return resolverInformation;
   }
