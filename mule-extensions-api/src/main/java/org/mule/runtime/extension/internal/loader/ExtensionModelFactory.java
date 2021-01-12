@@ -8,6 +8,7 @@ package org.mule.runtime.extension.internal.loader;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static java.lang.String.format;
+import static java.lang.System.getProperty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableList;
@@ -110,11 +111,15 @@ import org.mule.runtime.extension.internal.loader.validator.ExclusiveParameterMo
 import org.mule.runtime.extension.internal.loader.validator.FunctionModelValidator;
 import org.mule.runtime.extension.internal.loader.validator.NameClashModelValidator;
 import org.mule.runtime.extension.internal.loader.validator.NameModelValidator;
+import org.mule.runtime.extension.internal.loader.validator.NewFancyFeatureValidator;
 import org.mule.runtime.extension.internal.loader.validator.OperationModelValidator;
 import org.mule.runtime.extension.internal.loader.validator.ParameterModelValidator;
 import org.mule.runtime.extension.internal.loader.validator.SubtypesModelValidator;
 import org.mule.runtime.extension.internal.loader.validator.TransactionalParametersValidator;
 import org.mule.runtime.extension.internal.loader.validator.ValidatorModelValidator;
+import org.mule.sdk.api.annotation.MinMuleVersion;
+import org.mule.sdk.api.annotation.param.RuntimeVersion;
+import org.mule.sdk.api.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -125,6 +130,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
+
+import javax.management.relation.RoleUnresolved;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -148,6 +155,7 @@ public final class ExtensionModelFactory {
 
   private final List<DeclarationEnricher> declarationEnrichers;
   private final List<ExtensionModelValidator> extensionModelValidators;
+  private final List<ExtensionModelValidator> forwardExtensionModelValidators;
   private final boolean validate;
 
   public ExtensionModelFactory() {
@@ -183,6 +191,8 @@ public final class ExtensionModelFactory {
                                                        new NameModelValidator(),
                                                        new BackPressureModelValidator()));
 
+    forwardExtensionModelValidators = unmodifiableList(asList(new NewFancyFeatureValidator()));
+
     validate = isTestingMode() || isForceExtensionValidation();
   }
 
@@ -209,10 +219,20 @@ public final class ExtensionModelFactory {
     return extensionModel;
   }
 
+  private List<Validator> getValidators() {
+    MuleVersion affordanceVersion = new MuleVersion(getProperty("affordanceVersion"));
+
+    return forwardExtensionModelValidators.stream().filter(validator -> {
+      MinMuleVersion minMuleVersionValidator = validator.getClass().getAnnotation(MinMuleVersion.class);
+      return affordanceVersion.atLeast(minMuleVersionValidator.value());
+    }).collect(toList());
+  }
+
   private void validate(ExtensionModel extensionModel, ProblemsReporter problemsReporter,
                         ExtensionLoadingContext extensionLoadingContext) {
     List<ExtensionModelValidator> validators = new LinkedList<>(extensionModelValidators);
     validators.addAll(extensionLoadingContext.getCustomValidators());
+    validators.addAll(getValidators());
 
     validators.forEach(v -> v.validate(extensionModel, problemsReporter));
   }
