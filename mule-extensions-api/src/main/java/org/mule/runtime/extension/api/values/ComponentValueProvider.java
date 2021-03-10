@@ -30,6 +30,11 @@ public interface ComponentValueProvider {
   Set<Value> getValues(String providerName) throws ValueResolvingException;
 
   /**
+   * ADD JDOC
+   */
+  Set<Value> getValues(String parameterName, String fieldPath) throws ValueResolvingException;
+
+  /**
    * Retrieves the list of associated {@link ValueProviderModel} with the given provider name in the component
    *
    * @param providerName The name of the value provider

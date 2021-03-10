@@ -33,6 +33,11 @@ public interface ConfigurationParameterValueProvider {
   Set<Value> getConfigValues(String parameterName) throws ValueResolvingException;
 
   /**
+   * ADD JDOC
+   */
+  Set<Value> getConfigValues(String parameterName, String fieldPath) throws ValueResolvingException;
+
+  /**
    * Retrieves the list of associated {@link ValueProviderModel} with the given provider name in the configuration
    *
    * @param providerName The name of the value provider
@@ -50,6 +55,11 @@ public interface ConfigurationParameterValueProvider {
    * @return {@link Set} of possible and valid {@link Value values}
    */
   Set<Value> getConnectionValues(String parameterName) throws ValueResolvingException;
+
+  /**
+   * ADD JDOC
+   */
+  Set<Value> getConnectionValues(String parameterName, String fieldPath) throws ValueResolvingException;
 
   /**
    * Retrieves the list of associated {@link ValueProviderModel} with the given provider name in the connection

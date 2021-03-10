@@ -583,7 +583,8 @@ public final class ExtensionModelFactory {
                                          parameter.getValueProviderModel(),
                                          parameter.getAllowedStereotypeModels(),
                                          parameter.getModelProperties(),
-                                         parameter.getDeprecation().orElse(null));
+                                         parameter.getDeprecation().orElse(null),
+                                         parameter.getFieldValueProviderModels());
     }
 
     private List<FunctionModel> toFunctions(List<FunctionDeclaration> expressionFunctions) {

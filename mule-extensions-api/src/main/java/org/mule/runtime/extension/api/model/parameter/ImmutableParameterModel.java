@@ -7,8 +7,14 @@
 package org.mule.runtime.extension.api.model.parameter;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.mule.runtime.api.functional.Either.left;
+import static org.mule.runtime.api.functional.Either.right;
+
 import org.mule.metadata.api.model.MetadataType;
+import org.mule.runtime.api.functional.Either;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.meta.model.ComponentModel;
 import org.mule.runtime.api.meta.model.ModelProperty;
@@ -16,6 +22,7 @@ import org.mule.runtime.api.meta.model.ParameterDslConfiguration;
 import org.mule.runtime.api.meta.model.deprecated.DeprecationModel;
 import org.mule.runtime.api.meta.model.display.DisplayModel;
 import org.mule.runtime.api.meta.model.display.LayoutModel;
+import org.mule.runtime.api.meta.model.parameter.FieldValueProviderModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterRole;
 import org.mule.runtime.api.meta.model.parameter.ValueProviderModel;
@@ -46,6 +53,7 @@ public final class ImmutableParameterModel extends AbstractNamedImmutableModel i
   private final LayoutModel layoutModel;
   private final List<StereotypeModel> allowedStereotypeModels;
   private final DeprecationModel deprecationModel;
+  private final List<FieldValueProviderModel> fieldValueProviderModels;
 
   /**
    * Creates a new instance with the given state
@@ -166,6 +174,52 @@ public final class ImmutableParameterModel extends AbstractNamedImmutableModel i
                                  List<StereotypeModel> allowedStereotypeModels,
                                  Set<ModelProperty> modelProperties,
                                  DeprecationModel deprecationModel) {
+    this(name, description, type, hasDynamicType, required, isConfigOverride, isComponentId, expressionSupport, defaultValue,
+         role, dslConfiguration, displayModel, layoutModel, valueProviderModel, allowedStereotypeModels, modelProperties,
+         deprecationModel, null);
+  }
+
+  /**
+   * Creates a new instance with the given state
+   *
+   * @param name              the parameter's name. Cannot be blank.
+   * @param description       the parameter's description
+   * @param type              the parameter's {@link MetadataType}. Cannot be {@code null}
+   * @param hasDynamicType    if the given {@code type} is of dynamic kind and has to be discovered during design time
+   * @param required          whether this parameter is required or not
+   * @param isConfigOverride  whether this parameter is a configuration override or not
+   * @param isComponentId     whether this parameter serves as a {@link ComponentModel} ID or not
+   * @param expressionSupport the {@link ExpressionSupport} that applies to {@code this} {@link ParameterModel}
+   * @param defaultValue      this parameter's default value
+   * @param role              this parameter's purpose
+   * @param dslConfiguration  a model which describes the DSL semantics for this parameter
+   * @param displayModel      a model which contains directive about how the parameter is displayed in the UI
+   * @param layoutModel       a model which contains directives about the parameter's layout in the UI
+   * @param allowedStereotypeModels  A {@link Set} with the stereotypes of the allowed values
+   * @param modelProperties   A {@link Set} of custom properties which extend this model
+   * @param deprecationModel  a {@link DeprecationModel} describing if the parameter is deprecated. A null value means it is not
+   *                          deprecated.
+   * @throws IllegalArgumentException if {@code required} is {@code true} and {@code defaultValue} is not {@code null} at the same
+   *         time
+   */
+  public ImmutableParameterModel(String name,
+                                 String description,
+                                 MetadataType type,
+                                 boolean hasDynamicType,
+                                 boolean required,
+                                 boolean isConfigOverride,
+                                 boolean isComponentId,
+                                 ExpressionSupport expressionSupport,
+                                 Object defaultValue,
+                                 ParameterRole role,
+                                 ParameterDslConfiguration dslConfiguration,
+                                 DisplayModel displayModel,
+                                 LayoutModel layoutModel,
+                                 ValueProviderModel valueProviderModel,
+                                 List<StereotypeModel> allowedStereotypeModels,
+                                 Set<ModelProperty> modelProperties,
+                                 DeprecationModel deprecationModel,
+                                 List<FieldValueProviderModel> fieldValueProviderModels) {
     super(name, description, displayModel, modelProperties);
     this.type = type;
     this.required = required;
@@ -180,6 +234,7 @@ public final class ImmutableParameterModel extends AbstractNamedImmutableModel i
     this.valueProviderModel = valueProviderModel;
     this.allowedStereotypeModels = unmodifiableList(allowedStereotypeModels);
     this.deprecationModel = deprecationModel;
+    this.fieldValueProviderModels = fieldValueProviderModels;
   }
 
   /**
@@ -283,6 +338,17 @@ public final class ImmutableParameterModel extends AbstractNamedImmutableModel i
   @Override
   public boolean isDeprecated() {
     return deprecationModel != null;
+  }
+
+  @Override
+  public Optional<Either<ValueProviderModel, List<FieldValueProviderModel>>> getValueProviderModels() {
+    if (valueProviderModel != null) {
+      return of(left(valueProviderModel));
+    } else if (fieldValueProviderModels != null) {
+      return of(right(fieldValueProviderModels));
+    } else {
+      return empty();
+    }
   }
 
   public String toString() {
