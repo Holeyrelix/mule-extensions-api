@@ -99,7 +99,6 @@ import org.mule.runtime.extension.internal.loader.enricher.DefaultStereotypeEnri
 import org.mule.runtime.extension.internal.loader.enricher.DynamicConfigDeclarationEnricher;
 import org.mule.runtime.extension.internal.loader.enricher.ErrorMappingsParameterDeclarationEnricher;
 import org.mule.runtime.extension.internal.loader.enricher.ExecutionTypeDeclarationEnricher;
-import org.mule.runtime.extension.internal.loader.enricher.ExtensionTypesDeclarationEnricher;
 import org.mule.runtime.extension.internal.loader.enricher.ExtensionsErrorsDeclarationEnricher;
 import org.mule.runtime.extension.internal.loader.enricher.NamedObjectDeclarationEnricher;
 import org.mule.runtime.extension.internal.loader.enricher.OAuthDeclarationEnricher;
@@ -166,7 +165,6 @@ public final class ExtensionModelFactory {
                                                    new ClassLoaderDeclarationEnricher(),
                                                    new ContentParameterDeclarationEnricher(),
                                                    new ExecutionTypeDeclarationEnricher(),
-                                                   new ExtensionTypesDeclarationEnricher(),
                                                    new XmlDeclarationEnricher(),
                                                    new TargetParameterDeclarationEnricher(),
                                                    new ExtensionsErrorsDeclarationEnricher(),
