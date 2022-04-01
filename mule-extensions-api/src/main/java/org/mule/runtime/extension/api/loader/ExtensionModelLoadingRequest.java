@@ -6,9 +6,10 @@
  */
 package org.mule.runtime.extension.api.loader;
 
+import static org.mule.runtime.api.util.Preconditions.checkArgument;
+
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
-import static org.mule.runtime.api.util.Preconditions.checkArgument;
 
 import org.mule.runtime.api.dsl.DslResolvingContext;
 import org.mule.runtime.api.meta.model.ExtensionModel;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Parameterizes the loading of one specific {@link ExtensionModel}
@@ -32,7 +34,7 @@ public final class ExtensionModelLoadingRequest {
 
     private final ExtensionModelLoadingRequest product;
 
-    private Builder(ClassLoader extensionClassLoader, DslResolvingContext dslResolvingContext) {
+    private Builder(Supplier<ClassLoader> extensionClassLoader, DslResolvingContext dslResolvingContext) {
       this.product = new ExtensionModelLoadingRequest(extensionClassLoader, dslResolvingContext);
     }
 
@@ -106,16 +108,25 @@ public final class ExtensionModelLoadingRequest {
    * @return a new {@link Builder}
    */
   public static Builder builder(ClassLoader extensionClassLoader, DslResolvingContext dslResolvingContext) {
+    return builder(() -> extensionClassLoader, dslResolvingContext);
+  }
+
+  /**
+   * @param extensionClassLoader The extension's {@link ClassLoader}
+   * @param dslResolvingContext  a {@link DslResolvingContext}
+   * @return a new {@link Builder}
+   */
+  public static Builder builder(Supplier<ClassLoader> extensionClassLoader, DslResolvingContext dslResolvingContext) {
     return new Builder(extensionClassLoader, dslResolvingContext);
   }
 
-  private final ClassLoader extensionClassLoader;
+  private final Supplier<ClassLoader> extensionClassLoader;
   private final DslResolvingContext dslResolvingContext;
   private final List<ExtensionModelValidator> validators = new LinkedList<>();
   private final List<DeclarationEnricher> enrichers = new LinkedList<>();
   private final Map<String, Object> parameters = new HashMap<>();
 
-  private ExtensionModelLoadingRequest(ClassLoader extensionClassLoader, DslResolvingContext dslResolvingContext) {
+  private ExtensionModelLoadingRequest(Supplier<ClassLoader> extensionClassLoader, DslResolvingContext dslResolvingContext) {
     checkArgument(extensionClassLoader != null, "extension classLoader cannot be null");
     checkArgument(dslResolvingContext != null, "Dsl resolving context cannot be null");
 
@@ -127,7 +138,7 @@ public final class ExtensionModelLoadingRequest {
    * @return The extension's classloader
    */
   public ClassLoader getExtensionClassLoader() {
-    return extensionClassLoader;
+    return extensionClassLoader.get();
   }
 
   /**
